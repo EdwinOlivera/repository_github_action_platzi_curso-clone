@@ -1,55 +1,94 @@
 name: Triggers
+# Mensaje personalizado que se mostrará cuando se ejecute el workflow
 run-name: ¡Estoy aprendiendo a usar diferentes Triggers!
+# Define los eventos que activarán este workflow
 on:
+  # Se ejecuta cuando hay un push
   push:
+    # Solo en la rama master
     branches:
       - master
+  # Se ejecuta cuando hay actividad en pull requests
   pull_request:
+    # Solo para estos tipos de eventos
     types: [opened, synchronize, reopened]
+    # Solo si los cambios afectan archivos Python
     paths:
       - '**.py'
+  # Se ejecuta cuando hay actividad en issues
   issues:
+    # Solo cuando se añade una etiqueta
     types:
       - labeled
+  # Permite ejecutar el workflow manualmente desde la interfaz de GitHub
   workflow_dispatch:
+    # Define los inputs que el usuario puede proporcionar
     inputs:
+      # Input para seleccionar el lenguaje favorito
       lenguaje_favorito:
+        # Descripción del input
         description: 'Lenguaje favorito'
+        # Valor por defecto
         default: Python
+        # Campo obligatorio
         required: true
+        # Tipo de input: menú de opciones
         type: choice
+        # Opciones disponibles
         options:
         - Python
         - JavaScript
         - Go
         - Dart
         - Ruby
+      # Input para el nombre del usuario
       nombre:
+        # Descripción del input
         description: 'Tu nombre'
+        # Campo obligatorio
         required: true
+        # Valor por defecto
         default: Juan
+        # Tipo de input: texto
         type: string
+  # Se ejecuta en un horario programado
   schedule:
+    # Expresión cron: todos los días a las 22:15 UTC
     - cron:  '15 22 * * *'
+# Define los trabajos que se ejecutarán
 jobs:
+  # Job que se ejecuta cuando se activa manualmente
   hola-mundo-manual:
+    # Sistema operativo donde se ejecutará
     runs-on: ubuntu-latest
+    # Lista de pasos a ejecutar
     steps:
+      # Descarga el código del repositorio
       - name: Checkout
         uses: actions/checkout@v3
+      # Define la variable de entorno USERNAME
       - name: Definir nombre
         run: echo "USERNAME=${{ inputs.nombre }}" >> $GITHUB_ENV
+      # Define la variable de entorno LANGUAGE
       - name: Definir lenguaje
         run: echo "LANGUAGE=${{ inputs.lenguaje_favorito }}" >> $GITHUB_ENV
+      # Ejecuta el script Python
       - name: Correr script
         run: python hola_lenguaje.py
+  # Job que se ejecuta para otros eventos (no manual)
   hola-mundo:
+    # Solo se ejecuta si NO es workflow_dispatch
     if: ${{ github.event_name != 'workflow_dispatch' }}
+    # Sistema operativo donde se ejecutará
     runs-on: ubuntu-latest
+    # Lista de pasos a ejecutar
     steps:
+      # Descarga el código del repositorio
       - name: Checkout
         uses: actions/checkout@v3
+      # Define la variable de entorno USERNAME con el usuario de GitHub
       - name: Definir variable
         run: echo "USERNAME=${{ github.actor }}" >> $GITHUB_ENV
+      # Ejecuta el script Python
       - name: Correr script
         run: python hola_mundo.py
